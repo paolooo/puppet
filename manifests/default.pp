@@ -20,8 +20,8 @@ if $host == '' { $host = 'localhost' }
 include apache
 include php
 include mysql
-include postgresql
-include sqlite
+#include postgresql
+#include sqlite
 
 
 # Setup
@@ -49,10 +49,10 @@ php::module { ['xdebug', 'mysql', 'curl', 'gd']:
   notify  => [ Service['httpd'], ],
 }
 
-php::conf { ['pdo','pdo_sqlite']:
-  require => Package['sqlite'],
-  notify  => Service['httpd'],
-}
+#php::conf { ['pdo','pdo_sqlite']:
+#  require => Package['sqlite'],
+#  notify  => Service['httpd'],
+#}
 
 ## MySQL Server
 class { 'mysql::server':
@@ -68,36 +68,33 @@ mysql::db { "$db_name":
 }
 
 ## PostgreSQL Server
-class { 'postgresql::server': }
-
-postgresql::db { "$db_name":
-  owner => "$db_name",
-  password  => "$password",
-}
+#class { 'postgresql::server': }
+#
+#postgresql::db { "$db_name":
+#  owner => "$db_name",
+#  password  => "$password",
+#}
 
 ## SQLite Config
-define sqlite::db(
-    $location   = '',
-    $owner      = 'root',
-    $group      = 0,
-    $mode       = '755',
-    $ensure     = present,
-    $sqlite_cmd = 'sqlite3'
-  ) {
-
-      file { $safe_location:
-        ensure  => $ensure,
-        owner   => $owner,
-        group   => $group,
-        notify  => Exec['create_development_db']
-      }
-
-      exec { 'create_development_db':
-        command     => "${sqlite_cmd} $db_location",
-        path        => '/usr/bin:/usr/local/bin',
-        refreshonly => true,
-      }
-  }
-
-
-
+#define sqlite::db(
+#    $location   = '',
+#    $owner      = 'root',
+#    $group      = 0,
+#    $mode       = '755',
+#    $ensure     = present,
+#    $sqlite_cmd = 'sqlite3'
+#  ) {
+#
+#      file { $safe_location:
+#        ensure  => $ensure,
+#        owner   => $owner,
+#        group   => $group,
+#        notify  => Exec['create_development_db']
+#      }
+#
+#      exec { 'create_development_db':
+#        command     => "${sqlite_cmd} $db_location",
+#        path        => '/usr/bin:/usr/local/bin',
+#        refreshonly => true,
+#      }
+#  }
