@@ -1,0 +1,24 @@
+[submodule "modules/apache"]
+	path = modules/apache
+	url = git://github.com/puppetlabs/puppetlabs-apache.git
+[submodule "modules/stdlib"]
+	path = modules/stdlib
+	url = git://github.com/puppetlabs/puppetlabs-stdlib.git
+[submodule "modules/mysql"]
+	path = modules/mysql
+	url = git://github.com/puppetlabs/puppetlabs-mysql.git
+[submodule "modules/postgresql"]
+	path = modules/postgresql
+	url = git://github.com/puppetlabs/puppet-postgresql.git
+[submodule "modules/sqlite"]
+	path = modules/sqlite
+	url = git://github.com/puppetlabs/puppetlabs-sqlite.git
+[submodule "modules/php"]
+	path = modules/php
+	url = git://github.com/lermit/puppet-php.git
+[submodule "modules/puppi"]
+	path = modules/puppi
+	url = git://github.com/example42/puppi.git
+[submodule "modules/firewall"]
+	path = modules/firewall
+	url = git://github.com/puppetlabs/puppetlabs-firewall.git
