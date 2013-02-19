@@ -34,3 +34,6 @@
 [submodule "modules/php"]
 	path = modules/php
 	url = git://github.com/example42/puppet-php.git
+[submodule "modules/pear"]
+	path = modules/pear
+	url = git://github.com/treehouseagency/puppet-pear.git

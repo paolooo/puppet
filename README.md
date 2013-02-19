@@ -9,7 +9,7 @@ Inspired by [devops-puppet](https://github.com/pyrocms/devops-puppet)
   * git://github.com/puppetlabs/puppetlabs-apache.git
   * git://github.com/puppetlabs/puppetlabs-stdlib.git
   * git://github.com/puppetlabs/puppetlabs-firewall.git
-* PHP 5.3.2
+* PHP 5.4
   * git://github.com/lermit/puppet-php.git
   * git://github.com/example42/puppi.git 
   * PHP Modules
@@ -24,7 +24,7 @@ Inspired by [devops-puppet](https://github.com/pyrocms/devops-puppet)
   * git://github.com/puppetlabs/puppet-postgresql.git
 * SQLite
   * git://github.com/puppetlabs/puppetlabs-sqlite.git
-* PEAR
+* [PEAR](https://github.com/treehouseagency/puppet-pear)
 * Vim
 * [Ruby](https://github.com/puppetlabs/puppetlabs-ruby)
 * [NodeJS](https://github.com/puppetlabs/puppetlabs-nodejs)
