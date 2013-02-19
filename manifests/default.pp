@@ -1,7 +1,10 @@
 # Default path
+include apt::update
 Exec {
-  path => ['/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin', '/usr/local/sbin']
+  path => ['/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin', '/usr/local/sbin', '/opt/local/bin'],
+  logoutput => true
 }
+Exec['apt_update'] -> Package <| |>
 
 exec { 'apt-get update':
   command => '/usr/bin/apt-get update'
