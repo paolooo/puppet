@@ -13,9 +13,6 @@
 [submodule "modules/sqlite"]
 	path = modules/sqlite
 	url = git://github.com/puppetlabs/puppetlabs-sqlite.git
-[submodule "modules/php"]
-	path = modules/php
-	url = git://github.com/lermit/puppet-php.git
 [submodule "modules/puppi"]
 	path = modules/puppi
 	url = git://github.com/example42/puppi.git
@@ -34,3 +31,6 @@
 [submodule "modules/nodejs"]
 	path = modules/nodejs
 	url = git://github.com/puppetlabs/puppetlabs-nodejs.git
+[submodule "modules/php"]
+	path = modules/php
+	url = git://github.com/example42/puppet-php.git
