@@ -19,9 +19,10 @@ if $host == '' { $host = 'localhost' }
 include php54
 include apache
 
-package { ['vim','curl','unzip','git','php5-cli','php5-common','php5-xdebug','php5-mysql','php5-mcrypt','php5-suhosin','php5-memcache','php5-sqlite','php5-xsl','php5-tidy','php5-dev']:
+#package { ['vim','curl','unzip','git','php5-cli','php5-xdebug','php5-mysql','php5-mcrypt','php5-suhosin','php5-memcache', 'php5-sqlite','php5-xsl','php5-tidy','php5-dev','php5-pgsql','php5-odbc', 'php5-ldap','php5-xmlrpc','php5-intl','php5-fpm']:
+package { ['vim','curl','unzip','git','php5-cli','php5-xdebug','php5-mysql','php5-mcrypt','php5-memcache']:
   ensure  => 'installed',
-  require => [Exec['apt-get update']]
+  require => Exec['apt-get update'],
 }
 
 package { ['php5-cgi']:
@@ -31,7 +32,7 @@ package { ['php5-cgi']:
 
 include pear
 include mysql
-include postgresql
+#include postgresql
 include sqlite
 include composer
 
@@ -53,7 +54,21 @@ class { 'php':
   version => latest,
 }
 
-php::module { ['curl', 'gd','gearman','inotify','sphinx','oauth','imap','intl','xhprof','proctitle','pecl-http','mogilefs','igbinary','gmagick']:
+## MySQL Server
+class { 'mysql::server':
+  config_hash => { 'root_password' => "${password}" }
+}
+
+## Ruby
+class { "ruby": 
+  gems_version => "latest"
+}
+
+## Nodejs
+class { "nodejs": }
+
+## PHP Module
+php::module { ['curl', 'gd']:
   notify  => [ Service['httpd'], ],
 }
 
@@ -65,11 +80,7 @@ pear::package { "PHPUnit":
   require     => Pear::Package["PEAR"],
 }
 
-## MySQL Server
-class { 'mysql::server':
-  config_hash => { 'root_password' => "${password}" }
-}
-
+## DB
 mysql::db { "${db_name}":
   user  => "${username}",
   password  => "${password}",
@@ -79,7 +90,7 @@ mysql::db { "${db_name}":
 }
 
 ## PostgreSQL Server
-class { 'postgresql::server': }
+#class { 'postgresql::server': }
 
 #postgresql::db { "${db_name}":
 #  user => "${db_name}",
@@ -111,10 +122,3 @@ define sqlite::db(
       }
   }
 
-## Ruby
-class { "ruby": 
-  gems_version => "latest"
-}
-
-## Nodejs
-class { "nodejs": }
