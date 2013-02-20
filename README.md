@@ -28,3 +28,5 @@ Inspired by [devops-puppet](https://github.com/pyrocms/devops-puppet)
 * Vim
 * [Ruby](https://github.com/puppetlabs/puppetlabs-ruby)
 * [NodeJS](https://github.com/puppetlabs/puppetlabs-nodejs)
+* git
+* [Composer](http://getcomposer.org)
