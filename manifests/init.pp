@@ -1,11 +1,8 @@
 # Default path
-include apt
-Exec {
-  path => ['/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin', '/usr/local/sbin', '/opt/local/bin'],
-}
-
+Exec { path => ['/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin', '/usr/local/sbin', '/opt/local/bin'] }
 exec { 'apt-get update':
-  command => '/usr/bin/apt-get update --fix-missing'
+  command => '/usr/bin/apt-get update --fix-missing',
+  require => Exec['add php54 apt-repo']
 }
 
 # Configuration
@@ -15,46 +12,46 @@ if $username == '' { $username = 'root' }
 if $password == '' { $password = '123' }
 if $host == '' { $host = 'localhost' }
 
-#Packages
-include php54
-include apache
+# Setup
 
-#package { ['vim','curl','unzip','git','php5-cli','php5-xdebug','php5-mysql','php5-mcrypt','php5-suhosin','php5-memcache', 'php5-sqlite','php5-xsl','php5-tidy','php5-dev','php5-pgsql','php5-odbc', 'php5-ldap','php5-xmlrpc','php5-intl','php5-fpm']:
-package { ['vim','curl','unzip','git','php5-cli','php5-xdebug','php5-mysql','php5-mcrypt','php5-memcache']:
-  ensure  => 'installed',
+## PHP
+include php54
+class { 'php': version => latest, }
+
+## APACHE2
+include apache
+class {'apache::mod::php': }
+
+## PACKAGES
+## 'vim','curl','unzip','git','php5-mysql','php5-sqlite','php5-mcrypt','php5-memcache',
+## 'php5-suhosin','php5-xsl','php5-tidy','php5-dev','php5-pgsql','php5-odbc', 'php5-ldap','php5-xmlrpc','php5-intl','php5-fpm'
+package { ['vim','curl','unzip','git','php5-mcrypt','php5-memcached']:
+  ensure  => installed,
   require => Exec['apt-get update'],
 }
 
-package { ['php5-cgi']:
+package { ['php5-mysql','php5-sqlite']:
   ensure  => installed,
   require => Exec['apt-get update'],
 }
 
 include pear
 include mysql
-#include postgresql
+##include postgresql
 include sqlite
 include composer
+include laravel
 
-# Setup
-## Apache
-class {'apache::mod::php': }
-
+### Apache
 apache::vhost { $fqdn:
   priority  => '20',
   port => '80',
   docroot => $docroot,
   configure_firewall  => false,
 }
-
 a2mod { 'rewrite': ensure => present }
 
-## PHP
-class { 'php':
-  version => latest,
-}
-
-## MySQL Server
+### MySQL Server
 class { 'mysql::server':
   config_hash => { 'root_password' => "${password}" }
 }
@@ -66,8 +63,6 @@ class { "ruby":
 
 ## Nodejs
 class { "nodejs": }
-
-## PHP Module
 php::module { ['curl', 'gd']:
   notify  => [ Service['httpd'], ],
 }
@@ -89,15 +84,14 @@ mysql::db { "${db_name}":
   charset => 'utf8',
 }
 
-## PostgreSQL Server
-#class { 'postgresql::server': }
-
-#postgresql::db { "${db_name}":
-#  user => "${db_name}",
-#  password  => "${password}",
-#}
-
-
+### PostgreSQL Server
+##class { 'postgresql::server': }
+##
+##postgresql::db { "${db_name}":
+##  user => "${db_name}",
+##  password  => "${password}",
+##}
+#
 ## SQLite Config
 define sqlite::db(
     $location   = '',
