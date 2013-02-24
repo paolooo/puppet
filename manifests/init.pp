@@ -40,7 +40,6 @@ include mysql
 ##include postgresql
 include sqlite
 include composer
-include laravel
 
 ### Apache
 apache::vhost { $fqdn:
