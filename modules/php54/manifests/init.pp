@@ -5,7 +5,6 @@ class php54
     require => Exec['php54 apt update']
   }
   
-  #https://launchpad.net/~ondrej/+archive/php5
   exec { 'add php54 apt-repo':
     command => '/usr/bin/add-apt-repository ppa:ondrej/php5 -y',
     require => Package['python-software-properties']
@@ -20,15 +19,8 @@ class php54
     require => Exec['apt-get update']
   }
 
-  package { ['php5-xdebug', 'php5-suhosin', 'php5-xsl']:
+  package { ['php5-xdebug', 'php5-xsl']:
     ensure  => installed,
     require => Package['php5-cli'],
   }
-
-  #file {
-  #}
-
-  #file {
-  #}
 }
-
