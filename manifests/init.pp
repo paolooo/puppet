@@ -41,27 +41,30 @@ include mysql
 include sqlite
 include composer
 
-### Apache
-apache::vhost { $fqdn:
-  priority  => '20',
-  port => '80',
-  docroot => $docroot,
-  configure_firewall  => false,
-}
-a2mod { 'rewrite': ensure => present }
-
 ### MySQL Server
 class { 'mysql::server':
   config_hash => { 'root_password' => "${password}" }
 }
 
+### Apache
+apache::vhost { $fqdn:
+  priority  => '20',
+  port => '80',
+  docroot => $docroot,
+  logroot => $docroot, # access_log and error_log
+  configure_firewall  => false,
+}
+a2mod { 'rewrite': ensure => present }
 ## Ruby
+
 class { "ruby": 
   gems_version => "latest"
 }
 
 ## Nodejs
 class { "nodejs": }
+
+## PHP MODULES
 php::module { ['curl', 'gd']:
   notify  => [ Service['httpd'], ],
 }
@@ -114,4 +117,3 @@ define sqlite::db(
         refreshonly => true,
       }
   }
-
