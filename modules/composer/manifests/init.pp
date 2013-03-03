@@ -10,7 +10,8 @@ class composer {
     command => '/usr/bin/curl -s http://getcomposer.org/installer | /usr/bin/php -- --install-dir=/home/vagrant',
     path    => '/home/vagrant',
     require => Package['curl','php5-cli'],
-    creates => '/home/vagrant/composer.phar'
+    creates => '/home/vagrant/composer.phar',
+    unless  =>  ["/usr/bin/test -e /usr/local/bin/composer"]
   }
 
   # move file to bin
