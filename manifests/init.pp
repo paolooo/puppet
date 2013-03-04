@@ -76,6 +76,11 @@ pear::package { "PHPUnit":
   repository  => "pear.phpunit.de",
   require     => Pear::Package["PEAR"],
 }
+pear::package { "Yaml": 
+  version     => "latest",
+  repository  => "pear.symfony.com",
+  require     => Pear::Package["PEAR"]
+}
 
 ## DB
 mysql::db { "${db_name}":
