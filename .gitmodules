@@ -37,6 +37,3 @@
 [submodule "modules/postgresql"]
 	path = modules/postgresql
 	url = https://github.com/akumria/puppet-postgresql.git
-[submodule "modules/phpmyadmin"]
-	path = modules/phpmyadmin
-	url = https://github.com/justicel/puppet-phpmyadmin.git
