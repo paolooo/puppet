@@ -36,4 +36,4 @@
 	url = git://github.com/treehouseagency/puppet-pear.git
 [submodule "modules/postgresql"]
 	path = modules/postgresql
-	url = https://github.com/example42/puppet-postgresql.git
+	url = https://github.com/akumria/puppet-postgresql.git
