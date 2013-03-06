@@ -91,14 +91,18 @@ mysql::db { "${db_name}":
   charset => 'utf8',
 }
 
-### PostgreSQL Server
-##class { 'postgresql::server': }
-##
-##postgresql::db { "${db_name}":
-##  user => "${db_name}",
-##  password  => "${password}",
-##}
-#
+## PostgreSQL Server
+class { 'postgresql':
+  version => 'latest',
+}
+
+class { 'postgresql::server': }
+
+postgresql::db { "${db_name}":
+  owner => "${username}",
+  password  => "${password}",
+}
+
 ## SQLite Config
 define sqlite::db(
     $location   = '',
