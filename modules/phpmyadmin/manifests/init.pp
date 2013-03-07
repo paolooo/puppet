@@ -13,7 +13,7 @@ class phpmyadmin {
 
   file { 'phpmyadmin_config':
     path    => '/etc/phpmyadmin/config.inc.php',
-    content => template('phpmyadmin/config.inc/php'),
+    content => template('phpmyadmin/config.inc.php'),
     ensure  => file,
     owner   => root,
     group   => 0,

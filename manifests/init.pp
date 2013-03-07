@@ -36,15 +36,7 @@ package { ['php5-mysql','php5-sqlite']:
 }
 
 include pear
-include mysql
-##include postgresql
-include sqlite
 include composer
-
-### MySQL Server
-class { 'mysql::server':
-  config_hash => { 'root_password' => "${password}" }
-}
 
 ### Apache
 apache::vhost { $fqdn:
@@ -55,8 +47,8 @@ apache::vhost { $fqdn:
   configure_firewall  => false,
 }
 a2mod { 'rewrite': ensure => present }
-## Ruby
 
+## Ruby
 class { "ruby": 
   gems_version => "latest"
 }
@@ -83,6 +75,11 @@ pear::package { "Yaml":
 }
 
 ## DB
+### MySQL
+class { 'mysql::server':
+  config_hash => { 'root_password' => "${password}" }
+}
+class { 'mysql': }
 mysql::db { "${db_name}":
   user  => "${username}",
   password  => "${password}",
@@ -91,19 +88,18 @@ mysql::db { "${db_name}":
   charset => 'utf8',
 }
 
-## PostgreSQL Server
+### PostgreSQL
 class { 'postgresql':
   version => 'latest',
 }
-
 class { 'postgresql::server': }
-
 postgresql::db { "${db_name}":
   owner => "${username}",
   password  => "${password}",
 }
 
-## SQLite Config
+### SQLite Config
+class { 'sqlite': }
 define sqlite::db(
     $location   = '',
     $owner      = 'root',
@@ -126,3 +122,6 @@ define sqlite::db(
         refreshonly => true,
       }
   }
+
+## phpmyadmin
+class { 'phpmyadmin': } 
