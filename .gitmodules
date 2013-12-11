@@ -37,3 +37,9 @@
 [submodule "modules/postgresql"]
 	path = modules/postgresql
 	url = https://github.com/akumria/puppet-postgresql.git
+[submodule "modules/concat"]
+	path = modules/concat
+	url = https://github.com/puppetlabs/puppetlabs-concat.git
+[submodule "modules/epel"]
+	path = modules/epel
+	url = https://github.com/stahnma/puppet-module-epel.git
