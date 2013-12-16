@@ -9,7 +9,7 @@ class composer {
   exec { 'install composer':
     command => '/usr/bin/curl -s http://getcomposer.org/installer | /usr/bin/php -- --install-dir=/home/vagrant',
     path    => '/home/vagrant',
-    require => Package['curl','php5-cli'],
+    require => Package['curl'],
     creates => '/home/vagrant/composer.phar',
     unless  =>  ["/usr/bin/test -e /usr/local/bin/composer"]
   }
