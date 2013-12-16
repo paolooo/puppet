@@ -1,127 +1,249 @@
 # Default path
 Exec { path => ['/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin', '/usr/local/sbin', '/opt/local/bin'] }
-exec { 'apt-get update':
-  command => '/usr/bin/apt-get update --fix-missing',
-  require => Exec['add php54 apt-repo']
-}
+# exec { 'apt-get update':
+#   command => '/usr/bin/apt-get update --fix-missing',
+#   require => Exec['add php54 apt-repo']
+# }
 
 # Configuration
+if $domain == '' { $domain = 'localhost' }
 if $db_name == '' { $db_name = 'development' }
 if $db_location == '' { $db_location  = '/vagrant/db/development.sqlite' }
 if $username == '' { $username = 'root' }
 if $password == '' { $password = '123' }
 if $host == '' { $host = 'localhost' }
+if $docroot == '' { $host = 'docroot' }
 
-# Setup
 
-## PHP
-include php54
-class { 'php': version => latest, }
+class myinit {
+  case $::operatingsystem {
+    'RedHat', 'Fedora', 'CentOS', 'Scientific', 'SLC', 'Ascendos', 'CloudLinux', 'PSBM', 'OracleLinux', 'OVS', 'OEL': {
+      # $osfamily = 'RedHat'
 
-## APACHE2
-include apache
-class {'apache::mod::php': }
-
-## PACKAGES
-## 'vim','curl','unzip','git','php5-mysql','php5-sqlite','php5-mcrypt','php5-memcache',
-## 'php5-suhosin','php5-xsl','php5-tidy','php5-dev','php5-pgsql','php5-odbc', 'php5-ldap','php5-xmlrpc','php5-intl','php5-fpm'
-package { ['vim','curl','unzip','git','php5-mcrypt','php5-memcached']:
-  ensure  => installed,
-  require => Exec['apt-get update'],
-}
-
-package { ['php5-mysql','php5-sqlite']:
-  ensure  => installed,
-  require => Exec['apt-get update'],
-}
-
-include pear
-include composer
-
-### Apache
-apache::vhost { $fqdn:
-  priority  => '20',
-  port => '80',
-  docroot => $docroot,
-  logroot => $docroot, # access_log and error_log
-  configure_firewall  => false,
-}
-a2mod { 'rewrite': ensure => present }
-
-## Ruby
-class { "ruby": 
-  gems_version => "latest"
-}
-
-## Nodejs
-class { "nodejs": }
-
-## PHP MODULES
-php::module { ['curl', 'gd']:
-  notify  => [ Service['httpd'], ],
-}
-
-## PEAR
-pear::package { "PEAR": }
-pear::package { "PHPUnit": 
-  version     => "latest",
-  repository  => "pear.phpunit.de",
-  require     => Pear::Package["PEAR"],
-}
-pear::package { "Yaml": 
-  version     => "latest",
-  repository  => "pear.symfony.com",
-  require     => Pear::Package["PEAR"]
-}
-
-## DB
-### MySQL
-class { 'mysql::server':
-  config_hash => { 'root_password' => "${password}" }
-}
-class { 'mysql': }
-mysql::db { "${db_name}":
-  user  => "${username}",
-  password  => "${password}",
-  host  =>  "${host}",
-  grant => ['all'],
-  charset => 'utf8',
-}
-
-### PostgreSQL
-class { 'postgresql':
-  version => 'latest',
-}
-class { 'postgresql::server': }
-postgresql::db { "${db_name}":
-  owner => "${username}",
-  password  => "${password}",
-}
-
-### SQLite Config
-class { 'sqlite': }
-define sqlite::db(
-    $location   = '',
-    $owner      = 'root',
-    $group      = 0,
-    $mode       = '755',
-    $ensure     = present,
-    $sqlite_cmd = 'sqlite3'
-  ) {
-
-      file { $safe_location:
-        ensure  => $ensure,
-        owner   => $owner,
-        group   => $group,
-        notify  => Exec['create_development_db']
+      exec { "cleaner": 
+        command => "rm -f /var/cache/yum/timedhosts.txt"
       }
 
-      exec { 'create_development_db':
-        command     => "${sqlite_cmd} $db_location",
-        path        => '/usr/bin:/usr/local/bin',
-        refreshonly => true,
+      exec { "selinux-0":
+        command => "echo \"0\" > /selinux/enforce"
       }
+
+      include epel
+
+      # exec { "Development Tools":
+        # command => 'yum -y groupinstall "Development Tools"'
+        # , unless => 'yum grouplist "Development Tools" | grep "^Installed Groups"'
+      # }
+      # ->
+      # exec { "yum install screen": }
+
+      package { "screen": 
+        ensure => installed
+      }
+
+    }
+    'ubuntu', 'debian': {
+      # $osfamily = 'Debian'
+    }
+    'SLES', 'SLED', 'OpenSuSE', 'SuSE': {
+      # $osfamily = 'Suse'
+    }
+    'Solaris', 'Nexenta': {
+      # $osfamily = 'Solaris'
+    }
+    default: {
+      # $osfamily = $::operatingsystem
+    }
   }
 
-## phpmyadmin
-class { 'phpmyadmin': } 
+  notify { "$::osfamily/$::operatingsystem": }
+}
+
+
+class myapache {
+  require myinit
+  
+  class { "apache":
+    default_mods  => false 
+    , default_confd_files => false
+    , require => [ Exec["cleaner", "selinux-0"] ]
+  }
+  
+  apache::vhost { $domain:
+    priority  => "20"
+    , port => "80"
+    , docroot => $docroot
+    , logroot => $docroot # access_log and error_log
+    , directories => [{
+      path => $docroot
+      , allow_override => ["all"]
+      , options => ["Indexes", "FollowSymLinks", "MultiViews"]
+    }]
+  }
+
+}
+
+class myphp {
+  require myapache
+
+  class { "php":
+    package => "php53"
+    , module_prefix => "php53-"
+    , service => "httpd"
+  }
+
+  include apache::mod::php
+
+  php::module {[
+    'cli'
+    , 'common'
+    , 'devel'
+    , 'xml'
+    , 'gd'
+    , 'mbstring'
+    , 'mcrypt'
+    , 'mysql'
+    , 'soap'
+    , 'pdo'
+    , 'xmlrpc'
+    , 'bcmath'
+    , 'snmp'
+  ]:
+  }
+}
+
+
+class mypear {
+  include pear
+
+  exec { "pear-upgrade-console":
+    command => "pear upgrade --force Console_Getopt"
+    , onlyif => "grep \"@version\s*Release: 1.4\" /usr/share/pear/PEAR.php"
+    , require => [ Class['pear'] ]
+  }
+  exec { "pear-upgrade-force":
+    command => "pear upgrade --force pear"
+    , onlyif => "grep \"@version\s*Release: 1.4\" /usr/share/pear/PEAR.php"
+    , require => [ Exec["pear-upgrade-console"] ]
+  }
+  exec { "pear-upgrade":
+    command => "pear upgrade"
+    , onlyif => "grep \"@version\s*Release: 1.4\" /usr/share/pear/PEAR.php"
+    , require => [ Exec["pear-upgrade-force"] ]
+  }
+
+  exec { "install-structures_graph": 
+    command => "wget -P /tmp http://download.pear.php.net/package/Structures_Graph-1.0.4.tgz && tar xvfz Structures_Graph-1.0.4.tgz && mv Structures_Graph-1.0.4/Structures /usr/share/pear"
+    , cwd => "/tmp"
+    , unless => "test -d /usr/share/pear/Structures"
+    , require => [ Exec["pear-upgrade"] ]
+  }
+
+  exec { "pear install Structures_Graph":
+    require => [ Exec["install-structures_graph"] ]
+    , unless => "pear list | grep Structures_Graph"
+  }
+
+  exec {  "auto-discover":
+    command => "pear config-set auto_discover 1"
+    , unless => "test -d /usr/share/pear/PHPUnit"
+    , require => [ Exec["pear-upgrade"] ]
+  } 
+
+  exec { "pear-channel-config":
+    command => "pear channel-discover pear.phpunit.de"
+    , require => [ Exec["pear-upgrade"] ]
+    , unless => "pear list-channels | grep pear.phpunit.de"
+  }
+  ->
+  exec { "pear-channel-config-component":
+    command => "pear channel-discover components.ez.no"
+    , unless => "pear list-channels | grep components.ez.no"
+  }
+  ->
+  exec { "pear-channel-config-symfony":
+    command => "pear channel-discover pear.symfony-project.com"
+    , unless => "pear list-channels | grep pear.symfony-project.com"
+  }
+
+  # exec { "pear install pear.phpunit.de/PHPUnit":
+  exec { "pear install --alldeps --force phpunit/PHPUnit":
+    unless => "test -d /usr/share/pear/PHPUnit"
+    , require =>  [ Exec["pear-channel-config"] ]
+  }
+
+  exec { "pear install --force phpunit/PHPUnit_MockObject":
+    unless => "test -d /usr/share/pear/PHPUnit"
+    , require =>  [ Exec["pear-channel-config"] ]
+  }
+
+  pear::package { "XML_Util":
+    require =>  [ Exec["pear-upgrade"] ]
+  }
+}
+
+
+class myimagemagick {
+  require myphp
+
+  package { [
+      "gcc"
+      , "ImageMagick"
+      , "ImageMagick-devel"
+      , "ImageMagick-perl"
+    ]:
+    ensure => installed
+  }
+
+  exec { "pecl install imagick":
+    require => [ Package["ImageMagick"] ]
+    , unless => "pecl list | grep imagick"
+  }
+  ->
+  exec { "echo extension=imagick.so >> /etc/php.ini":
+    notify => [ Service["httpd"] ]
+    , unless => "grep imagick.so /etc/php.ini"
+  }
+}
+
+class mymysql {
+  require myphp
+
+  class { '::mysql::server':
+    root_password    => $password
+    , remove_default_accounts => true
+    , override_options => { 'mysqld' => { 'max_connections' => '1024' } }
+  }
+
+  mysql::db { $db_name:
+    user  => $username
+    , password  => $password
+    , host  =>  $host
+    , grant => ["all"]
+    , charset => "utf8"
+    , sql => $db_location
+  } 
+}
+
+
+class mymisc {
+  require myinit
+
+  package { ['vim-enhanced','curl','unzip','git']:
+    ensure  => installed
+  }
+  
+  include composer
+  include phpmyadmin
+  # include nodejs
+
+  class { "ruby": }
+}
+
+include myinit
+include myapache
+include myphp
+include mypear
+include myimagemagick
+include mymysql
+include mymisc
