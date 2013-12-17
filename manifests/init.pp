@@ -28,6 +28,10 @@ class myinit {
         command => "echo \"0\" > /selinux/enforce"
       }
 
+      class { "selinux":
+        mode => disabled
+      }
+
       include epel
 
       # exec { "Development Tools":
