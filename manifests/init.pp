@@ -236,8 +236,7 @@ class mymisc {
   include composer
   include phpmyadmin
   # include nodejs
-
-  class { "ruby": }
+  # class { "ruby": }
 }
 
 include myinit
