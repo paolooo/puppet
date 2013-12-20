@@ -13,6 +13,7 @@ if $username == '' { $username = 'root' }
 if $password == '' { $password = '123' }
 if $host == '' { $host = 'localhost' }
 if $docroot == '' { $host = 'docroot' }
+if $aliases == '' { $aliases = 'localhost' }
 
 
 class myinit {
@@ -78,11 +79,78 @@ class myapache {
     , port => "80"
     , docroot => $docroot
     , logroot => $docroot # access_log and error_log
+    , serveraliases => [$aliases]
     , directories => [{
       path => $docroot
       , allow_override => ["all"]
       , options => ["Indexes", "FollowSymLinks", "MultiViews"]
     }]
+  }
+
+  if $domain != "localhost" {
+    apache::vhost { "localhost":
+      priority  => "20"
+      , port => "80"
+        , docroot => "/vagrant/www"
+      , logroot => "/vagrant/www" # access_log and error_log
+      , directories => [{
+        path => "/vagrant/www"
+        , allow_override => ["all"]
+        , options => ["Indexes", "FollowSymLinks", "MultiViews"]
+      }]
+    }
+  }
+
+  apache::mod { [
+      # 'alias'
+      'auth_basic'
+    , 'auth_digest'
+    , 'authn_file'
+    , 'authn_alias'
+    , 'authn_anon'
+    , 'authn_dbm'
+    , 'authn_default'
+    , 'authz_user'
+    , 'authz_owner'
+    , 'authz_groupfile'
+    , 'authz_dbm'
+    , 'authz_default'
+    , 'ldap'
+    , 'include'
+    , 'logio'
+    , 'env'
+    , 'ext_filter'
+    , 'expires'
+    , 'usertrack'
+    , 'actions'
+    , 'speling'
+    , 'substitute'
+    , 'proxy_balancer'
+    , 'proxy_ftp'
+    , 'proxy_connect'
+    , 'suexec'
+    , 'version'
+    , 'autoindex'
+    , 'cache'
+    , 'cgi'
+    , 'dav'
+    , 'dav_fs'
+    , 'deflate'
+    , 'disk_cache'
+    , 'headers'
+    , 'info'
+    # , 'mime'
+    , 'mime_magic'
+    , 'negotiation'
+    , 'proxy'
+    , 'proxy_ajp'
+    , 'proxy_http'
+    , 'rewrite'
+    , 'setenvif'
+    , 'status'
+    , 'userdir'
+    , 'vhost_alias'
+    ]:
   }
 
 }
