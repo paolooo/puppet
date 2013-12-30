@@ -70,21 +70,21 @@ class myapache {
   
   class { "apache":
     default_mods  => false 
-    , default_confd_files => false
-    , require => [ Exec["cleaner", "selinux-0"] ]
+  , default_confd_files => false
+  , require => [ Exec["cleaner", "selinux-0"] ]
   }
   
   apache::vhost { $domain:
     priority  => "20"
-    , port => "80"
-    , docroot => $docroot
-    , logroot => $docroot # access_log and error_log
-    , serveraliases => [$aliases]
-    , directories => [{
-      path => $docroot
-      , allow_override => ["all"]
-      , options => ["Indexes", "FollowSymLinks", "MultiViews"]
-    }]
+  , port => "80"
+  , docroot => $docroot
+  , logroot => $docroot # access_log and error_log
+  , serveraliases => [$aliases]
+  , directories => [{
+    path => $docroot
+    , allow_override => ["all"]
+    , options => ["Indexes", "FollowSymLinks", "MultiViews"]
+  }]
   }
 
   if $domain != "localhost" {
@@ -117,7 +117,7 @@ class myapache {
     , 'authz_default'
     , 'ldap'
     , 'include'
-    , 'logio'
+    # , 'logio'
     , 'env'
     , 'ext_filter'
     , 'expires'
