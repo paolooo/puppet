@@ -3,13 +3,23 @@ class phpmyadmin {
   #   ensure  => present,
   # }
 
+  case $::operatingsystem {
+    'RedHat', 'Fedora', 'CentOS', 'Scientific', 'SLC', 'Ascendos', 'CloudLinux', 'PSBM', 'OracleLinux', 'OVS', 'OEL': {
+      $conf = "/etc/httpd/conf.d/phpMyAdmin.conf"
+    }
+
+    'ubuntu', 'debian': {
+      $conf = "/etc/apache2/sites-enabled/phpMyAdmin.conf"
+    }
+  }
+
   exec { "install-phpmyadmin": 
-    command => "wget /tmp 'http://dl.cihar.com/phpMyAdmin/master/phpMyAdmin-master-latest.tar.bz2#!md5!a06b6a6a4133a7f2035cfb31e67981cc' && tar xvfj phpMyAdmin-master-latest.tar.bz2 && rm phpMyAdmin-master-latest.tar.bz2 && mv phpMyAdmin-master-* phpmyadmin && cp phpmyadmin/config.sample.inc.php phpmyadmin/config.inc.php  && mv phpmyadmin /usr/share"
+    command => "wget /tmp 'http://dl.cihar.com/phpMyAdmin/master/phpMyAdmin-master-latest.tar.bz2#!md5!a06b6a6a4133a7f2035cfb31e67981cc' && tar xvfj phpMyAdmin-master-*.bz* && rm phpMyAdmin-master-latest.tar.bz2 && mv phpMyAdmin-master-* phpmyadmin && cp phpmyadmin/config.sample.inc.php phpmyadmin/config.inc.php  && mv phpmyadmin /usr/share"
     , cwd => "/tmp"
     , unless => "test -d /usr/share/phpmyadmin"
   }
 
-  file { '/etc/httpd/conf.d/phpMyAdmin.conf':
+  file { $conf:
     owner   => "root"
     , group   => "root"
     , mode    => 644
