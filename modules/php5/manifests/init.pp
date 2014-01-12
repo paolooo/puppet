@@ -9,7 +9,7 @@ class php5
   #   # "ppa:zanfur/php5.5":
   # , require => [ Package ["python-software-properties"] ]
   # }
-   
+
   # exec { 'apt-get update':
   #   command => "apt-get update --fix-missing"
   # , require => [ Apt::Ppa["ppa:ondrej/php5"] ]
